@@ -1,8 +1,10 @@
 import dotenv from "dotenv";
+import { processCrawlRecords } from "../utils/cheerio/processCrawlRecords.js";
 
 dotenv.config();
 
-export const accessCrawlData = async (jobId) => {
+export const accessCrawlData = async (accountId, jobId, apiToken) => {
+  // Response
   const response = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${accountId}/browser-rendering/crawl/${jobId}`,
     {
@@ -13,11 +15,88 @@ export const accessCrawlData = async (jobId) => {
     },
   );
 
+  // Successful response check
+  if (!response.ok) {
+    return {
+      status: "Failed",
+      success: false,
+      data: null,
+      error: "Cloudflare request failed",
+    };
+  }
+
   const data = await response.json();
-  return { data: data.result };
+  const status = data.result.status;
+  const records = data.result.records;
+
+  // Success check
+  if (!data.success) {
+    return {
+      status: status,
+      success: false,
+      data: null,
+      error: "Cloudflare request failed",
+    };
+  }
+
+  // Cheerio HTML processing
+  const textContent = processCrawlRecords(records);
+
+  // Status check
+  switch (status) {
+    case "completed":
+      return {
+        status: status,
+        success: true,
+        data: textContent,
+        error: null,
+      };
+    case "running":
+      return {
+        status: status,
+        success: false,
+        data: null,
+        error: null,
+      };
+    case "cancelled_due_to_timeout":
+      return {
+        status: status,
+        success: false,
+        data: null,
+        error: "Cancelled due to timeout",
+      };
+    case "cancelled_due_to_limits":
+      return {
+        status: status,
+        success: false,
+        data: null,
+        error: "Cancelled due to limits",
+      };
+    case "cancelled_by_user":
+      return {
+        status: status,
+        success: false,
+        data: null,
+        error: "Cancelled by the user",
+      };
+    case "errored":
+      return {
+        status: status,
+        success: false,
+        data: null,
+        error: "Crawl encountered an error",
+      };
+    default:
+      return {
+        status: "Unknown crawl status",
+        success: false,
+        data: null,
+        error: "Unknown error",
+      };
+  }
 };
 
-export const startCrawlingJob = async (accountId, apiToken, url = "https://developers.cloudflare.com/workers/") => {
+export const startCrawlingJob = async (accountId, apiToken, url) => {
   const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/browser-rendering/crawl`, {
     method: "POST",
     headers: {
@@ -29,15 +108,19 @@ export const startCrawlingJob = async (accountId, apiToken, url = "https://devel
     }),
   });
 
-  const jobId = await response.json();
-
-  if (jobId.success) {
-    return { jobId: jobId.result };
-  } else {
+  if (!response.ok) {
     return {
-      success: jobId.success,
-      jobId: jobId.success ? jobId.result : null,
-      errors: jobId.success ? null : jobId.errors,
+      success: false,
+      jobId: null,
+      error: "Cloudflare request failed",
     };
   }
+
+  const jobId = await response.json();
+
+  return {
+    success: jobId.success,
+    jobId: jobId.success ? jobId.result : null,
+    error: jobId.success ? null : jobId.errors,
+  };
 };

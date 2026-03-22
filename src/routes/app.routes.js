@@ -1,7 +1,7 @@
 import express from "express";
+import { crawlSite, getCrawlData } from "../controllers/api.controller.js";
 
-export const appRouter = express.Router()
+export const appRouter = express.Router();
 
-appRouter.get("/test", (req, res, next) => {
-    res.send("Hello")
-})
+appRouter.post("/sites", crawlSite);
+appRouter.get("/sites/:jobId/results", getCrawlData);

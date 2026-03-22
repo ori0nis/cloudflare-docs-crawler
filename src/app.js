@@ -7,6 +7,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Global log for all requests
+app.use((req, res, next) => {
+  console.log("🌩️  New request: ", req.method, req.path, req.headers["content-type"]);
+  next();
+});
+
 // JSON requests
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -28,18 +34,14 @@ app.use((req, res, next) => {
   next(error);
 });
 
-// Express error controller
+// Express error handler
 app.use((error, req, res, next) => {
-  return res.status(error.status || 500).json(error.message || "Unexpected error");
+  const status = error.status || 500;
+  const message = error.message || "Unexpected error";
+  return res.status(status).json({ message });
 });
 
 // Server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
-// Global log for all requests
-app.use((req, res, next) => {
-  console.log("New request: ", req.method, req.path, req.headers["content-type"]);
-  next();
+  console.log(`💡 Server running on http://localhost:${PORT}`);
 });
