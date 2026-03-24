@@ -28,12 +28,18 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
   const data = await response.json();
   const status = data.result.status;
   const records = data.result.records;
+  const totalRecords = data.result.total;
+  const finishedRecords = data.result.finished;
+  const skippedRecords = data.result.skipped;
 
   // Success check
   if (!data.success) {
     return {
       status: status,
       success: false,
+      totalRecords: totalRecords ?? 0,
+      finishedRecords: finishedRecords ?? 0,
+      skippedRecords: skippedRecords ?? 0,
       data: null,
       error: "Cloudflare request failed",
     };
@@ -48,6 +54,9 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
       return {
         status: status,
         success: true,
+        totalRecords: totalRecords ?? 0,
+        finishedRecords: finishedRecords ?? 0,
+        skippedRecords: skippedRecords ?? 0,
         data: textContent,
         error: null,
       };
@@ -55,6 +64,9 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
       return {
         status: status,
         success: false,
+        totalRecords: totalRecords ?? 0,
+        finishedRecords: finishedRecords ?? 0,
+        skippedRecords: skippedRecords ?? 0,
         data: null,
         error: null,
       };
@@ -62,6 +74,9 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
       return {
         status: status,
         success: false,
+        totalRecords: totalRecords ?? 0,
+        finishedRecords: finishedRecords ?? 0,
+        skippedRecords: skippedRecords ?? 0,
         data: null,
         error: "Cancelled due to timeout",
       };
@@ -69,6 +84,9 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
       return {
         status: status,
         success: false,
+        totalRecords: totalRecords ?? 0,
+        finishedRecords: finishedRecords ?? 0,
+        skippedRecords: skippedRecords ?? 0,
         data: null,
         error: "Cancelled due to limits",
       };
@@ -76,6 +94,9 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
       return {
         status: status,
         success: false,
+        totalRecords: totalRecords ?? 0,
+        finishedRecords: finishedRecords ?? 0,
+        skippedRecords: skippedRecords ?? 0,
         data: null,
         error: "Cancelled by the user",
       };
@@ -83,6 +104,9 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
       return {
         status: status,
         success: false,
+        totalRecords: totalRecords ?? 0,
+        finishedRecords: finishedRecords ?? 0,
+        skippedRecords: skippedRecords ?? 0,
         data: null,
         error: "Crawl encountered an error",
       };
@@ -90,6 +114,9 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
       return {
         status: "Unknown crawl status",
         success: false,
+        totalRecords: totalRecords ?? 0,
+        finishedRecords: finishedRecords ?? 0,
+        skippedRecords: skippedRecords ?? 0,
         data: null,
         error: "Unknown error",
       };
