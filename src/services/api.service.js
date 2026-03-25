@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import { processCrawlRecords } from "../utils/cheerio/processCrawlRecords.js";
+import { applyChunkingToRecords } from "../utils/RAG/chunking/applyChunkingToRecords.js";
 
 dotenv.config();
 
@@ -45,8 +46,9 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
     };
   }
 
-  // Cheerio HTML processing
+  // Cheerio and chunking processing
   const textContent = processCrawlRecords(records);
+  const chunkedRecords = applyChunkingToRecords(textContent);
 
   // Status check
   switch (status) {
@@ -57,7 +59,10 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
         totalRecords: totalRecords ?? 0,
         finishedRecords: finishedRecords ?? 0,
         skippedRecords: skippedRecords ?? 0,
-        data: textContent,
+        data: {
+          id: jobId,
+          chunks: chunkedRecords,
+        },
         error: null,
       };
     case "running":

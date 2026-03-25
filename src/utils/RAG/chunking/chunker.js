@@ -1,31 +1,52 @@
-const chunker = (text) => {
+export const chunker = (text) => {
   let chunks = [];
   let index = 0;
   let paragraphs = text.split("\n");
-  let MAX_SIZE = 800;
+  let MIN_SIZE = 200;
+  let MAX_SIZE = 500;
+  let buffer = "";
 
   paragraphs.forEach((paragraph) => {
     // Ignore empty paragraphs
-    if (!paragraph.trim()) return;
+    const trimmedParagraph = paragraph.trim();
+    if (!trimmedParagraph) return;
 
-    // If paragraph < MAX_SIZE, add it as a single chunk
-    if (paragraph.length <= MAX_SIZE) {
+    // If paragraph is < MIN_SIZE, accumulate it into buffer
+    if (trimmedParagraph.length < MIN_SIZE) {
+      buffer += (buffer ? " " : "") + trimmedParagraph;
+      return;
+    }
+
+    // Before processing good or big paragraphs, flush buffer
+    if (buffer) {
       chunks.push({
         index: index++,
-        text: paragraph.trim(),
+        text: buffer.trim(),
+      });
+
+      buffer = "";
+    }
+
+    // If paragraph < MAX_SIZE, add it as a single chunk
+    if (trimmedParagraph.length <= MAX_SIZE) {
+      chunks.push({
+        index: index++,
+        text: trimmedParagraph,
       });
     } else {
       // If paragraph > MAX_SIZE, split in sentences until chunk reaches MAX_SIZE
-      let sentences = paragraph.split(".");
+      let sentences = trimmedParagraph.split(".");
       let currentChunk = "";
 
       for (const sentence of sentences) {
         const trimmedSentence = sentence.trim();
         if (!trimmedSentence) continue;
 
+        const candidate = (currentChunk ? currentChunk + " " : "") + trimmedSentence + ".";
+
         // If sentence fits the current chunk -> accumulate
-        if ((currentChunk + trimmedSentence + ".").length <= MAX_SIZE) {
-          currentChunk += (currentChunk ? " " : "") + trimmedSentence + ".";
+        if (candidate.length <= MAX_SIZE) {
+          currentChunk = candidate;
         } else {
           // If sentence doesn't fit, push current chunk and start a new chunk with current sentence
           if (currentChunk) {
@@ -35,6 +56,7 @@ const chunker = (text) => {
             });
           }
 
+          // New chunk starts with current sentence
           currentChunk = trimmedSentence + ".";
         }
       }
@@ -48,6 +70,14 @@ const chunker = (text) => {
       }
     }
   });
+
+  // Final buffer flush
+  if (buffer) {
+    chunks.push({
+      index: index++,
+      text: buffer.trim(),
+    });
+  }
 
   return chunks;
 };
