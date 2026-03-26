@@ -9,7 +9,15 @@ const PORT = process.env.PORT || 3000;
 
 // Global log for all requests
 app.use((req, res, next) => {
-  console.log("🌩️  New request: ", req.method, req.path, req.headers["content-type"]);
+  console.log(
+    "🌩️  New request: ",
+    "⚙️  Method: ",
+    req.method,
+    "🛣️  Path: ",
+    req.path,
+    "🧠  Headers: ",
+    req.headers["content-type"],
+  );
   next();
 });
 

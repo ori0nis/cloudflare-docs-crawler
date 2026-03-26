@@ -68,7 +68,8 @@ export const getCrawlData = async (req, res, next) => {
     }
 
     const result = await accessCrawlData(accountId, jobId, apiToken);
-    const crawl = result.data;
+    const crawlData = result.job;
+    const chunks = result.chunks;
 
     if (result.success) {
       return res.status(200).json({
@@ -76,11 +77,8 @@ export const getCrawlData = async (req, res, next) => {
         message: "Crawl data provided",
         error: null,
         data: {
-          id: crawl.id,
-          totalRecords: crawl.totalRecords ?? 0,
-          finishedRecords: crawl.finishedRecords ?? 0,
-          skippedRecords: crawl.skippedRecords ?? 0,
-          result: crawl,
+          job: crawlData,
+          chunks,
         },
       });
     } else {

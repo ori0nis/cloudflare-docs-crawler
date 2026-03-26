@@ -3,14 +3,14 @@ import { chunker } from "./chunker.js";
 export const applyChunkingToRecords = (records) => {
   return records
     .filter((record) => record.hasContent)
-    .map((record) => {
+    .flatMap((record) => {
       const chunks = chunker(record.content);
 
       return chunks.map((chunk) => ({
         ...chunk,
         url: record.url,
         title: record.title,
+        dataset: record.dataset,
       }));
-    })
-    .flat();
+    });
 };

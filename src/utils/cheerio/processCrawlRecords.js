@@ -9,6 +9,7 @@ export const processCrawlRecords = (records) => {
       const base = {
         url: record.url,
         title: record.metadata.title || "Crawled page",
+        dataset: new URL(record.url).hostname,
       };
 
       const processed = cheerioProcessor(html);

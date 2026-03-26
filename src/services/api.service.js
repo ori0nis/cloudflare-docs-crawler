@@ -46,83 +46,71 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
     };
   }
 
-  // Cheerio and chunking processing
-  const textContent = processCrawlRecords(records);
-  const chunkedRecords = applyChunkingToRecords(textContent);
-
   // Status check
   switch (status) {
     case "completed":
+      // Cheerio and chunking processing. Do only in completed case for efficiency
+      const textContent = processCrawlRecords(records);
+      const chunkedRecords = applyChunkingToRecords(textContent);
+
       return {
         status: status,
         success: true,
-        totalRecords: totalRecords ?? 0,
-        finishedRecords: finishedRecords ?? 0,
-        skippedRecords: skippedRecords ?? 0,
-        data: {
+        job: {
           id: jobId,
-          chunks: chunkedRecords,
+          totalRecords: totalRecords ?? 0,
+          finishedRecords: finishedRecords ?? 0,
+          skippedRecords: skippedRecords ?? 0,
         },
+        chunks: chunkedRecords,
         error: null,
       };
     case "running":
       return {
         status: status,
         success: false,
-        totalRecords: totalRecords ?? 0,
-        finishedRecords: finishedRecords ?? 0,
-        skippedRecords: skippedRecords ?? 0,
-        data: null,
+        job: null,
+        chunks: null,
         error: null,
       };
     case "cancelled_due_to_timeout":
       return {
         status: status,
         success: false,
-        totalRecords: totalRecords ?? 0,
-        finishedRecords: finishedRecords ?? 0,
-        skippedRecords: skippedRecords ?? 0,
-        data: null,
+        job: null,
+        chunks: null,
         error: "Cancelled due to timeout",
       };
     case "cancelled_due_to_limits":
       return {
         status: status,
         success: false,
-        totalRecords: totalRecords ?? 0,
-        finishedRecords: finishedRecords ?? 0,
-        skippedRecords: skippedRecords ?? 0,
-        data: null,
+        job: null,
+        chunks: null,
         error: "Cancelled due to limits",
       };
     case "cancelled_by_user":
       return {
         status: status,
         success: false,
-        totalRecords: totalRecords ?? 0,
-        finishedRecords: finishedRecords ?? 0,
-        skippedRecords: skippedRecords ?? 0,
-        data: null,
+        job: null,
+        chunks: null,
         error: "Cancelled by the user",
       };
     case "errored":
       return {
         status: status,
         success: false,
-        totalRecords: totalRecords ?? 0,
-        finishedRecords: finishedRecords ?? 0,
-        skippedRecords: skippedRecords ?? 0,
-        data: null,
+        job: null,
+        chunks: null,
         error: "Crawl encountered an error",
       };
     default:
       return {
-        status: "Unknown crawl status",
+        status: status,
         success: false,
-        totalRecords: totalRecords ?? 0,
-        finishedRecords: finishedRecords ?? 0,
-        skippedRecords: skippedRecords ?? 0,
-        data: null,
+        job: null,
+        chunks: null,
         error: "Unknown error",
       };
   }
