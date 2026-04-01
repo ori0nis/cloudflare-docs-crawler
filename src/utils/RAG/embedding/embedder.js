@@ -1,12 +1,18 @@
-import { Ollama } from "ollama";
+import { pipeline } from "@xenova/transformers";
 
-const ollama = new Ollama();
+/* 
+* This local embeddings service exposes a function called `embedder`,
+* which processes text into 768 dimensional vectors using
+* Hugging Face's `all-mpnet-base-v2`, and executing locally
+*/
+
+const extractor = await pipeline("feature-extraction", "Xenova/all-mpnet-base-v2");
 
 export const embedder = async (text) => {
-  const response = await ollama.embeddings({
-    model: "llama3-embeddings",
-    input: text,
+  const output = await extractor(text, {
+    pooling: "mean",
+    normalize: true,
   });
 
-  return response.vector;
+  return Array.from(output.data);
 };

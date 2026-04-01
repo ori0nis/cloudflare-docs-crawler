@@ -21,7 +21,7 @@ export const chunker = (text) => {
     if (buffer) {
       chunks.push({
         index: index++,
-        text: buffer.trim(),
+        content: buffer.trim(),
       });
 
       buffer = "";
@@ -31,7 +31,7 @@ export const chunker = (text) => {
     if (trimmedParagraph.length <= MAX_SIZE) {
       chunks.push({
         index: index++,
-        text: trimmedParagraph,
+        content: trimmedParagraph,
       });
     } else {
       // If paragraph > MAX_SIZE, split in sentences until chunk reaches MAX_SIZE
@@ -52,7 +52,7 @@ export const chunker = (text) => {
           if (currentChunk) {
             chunks.push({
               index: index++,
-              text: currentChunk.trim(),
+              content: currentChunk.trim(),
             });
           }
 
@@ -65,7 +65,7 @@ export const chunker = (text) => {
       if (currentChunk) {
         chunks.push({
           index: index++,
-          text: currentChunk.trim(),
+          content: currentChunk.trim(),
         });
       }
     }
@@ -75,7 +75,7 @@ export const chunker = (text) => {
   if (buffer) {
     chunks.push({
       index: index++,
-      text: buffer.trim(),
+      content: buffer.trim(),
     });
   }
 

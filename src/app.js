@@ -1,11 +1,15 @@
 import express from "express";
 import dotenv from "dotenv";
 import { appRouter } from "./routes/app.routes.js";
+import { trySupabaseConnection } from "./config/trySupabaseConnection.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Supabase connection
+trySupabaseConnection();
 
 // Global log for all requests
 app.use((req, res, next) => {

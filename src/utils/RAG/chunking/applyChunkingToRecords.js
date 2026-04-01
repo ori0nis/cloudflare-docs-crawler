@@ -7,7 +7,7 @@ export const applyChunkingToRecords = (records) => {
       const chunks = chunker(record.content);
 
       return chunks.map((chunk) => ({
-        ...chunk,
+        ...chunk, // index + content
         url: record.url,
         title: record.title,
         dataset: record.dataset,

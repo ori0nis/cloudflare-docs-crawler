@@ -1,3 +1,4 @@
+import { ingestChunks } from "../ingestion-service/ingestChunks.js";
 import { accessCrawlData, startCrawlingJob } from "../services/api.service.js";
 import dotenv from "dotenv";
 
@@ -72,9 +73,14 @@ export const getCrawlData = async (req, res, next) => {
     const chunks = result.chunks;
 
     if (result.success) {
+      // Ingestion runs in background so API doesn't get blocked
+      ingestChunks(chunks)
+        .then((summary) => console.log("Ingestion finished: ", summary))
+        .catch((error) => console.error("Ingestion failed: ", error));
+
       return res.status(200).json({
         status: 200,
-        message: "Crawl data provided",
+        message: "Crawl data provided - ingestion running in background",
         error: null,
         data: {
           job: crawlData,
