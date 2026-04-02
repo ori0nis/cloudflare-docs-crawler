@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
-import { appRouter } from "./routes/app.routes.js";
-import { trySupabaseConnection } from "./config/trySupabaseConnection.js";
+import { APIRouter } from "./routes/API.routes.js";
+import { RAGRouter } from "./routes/RAG.routes.js";
 
 dotenv.config();
 
@@ -37,7 +37,8 @@ router.get("/", (req, res, next) => {
 app.use("/", router);
 
 // Rest of routes
-app.use("/app", appRouter);
+app.use("/app", APIRouter);
+app.use("/RAG", RAGRouter);
 
 // Not found route avoider
 app.use((req, res, next) => {
