@@ -1,8 +1,5 @@
-import dotenv from "dotenv";
-import { processCrawlRecords } from "../utils/cheerio/processCrawlRecords.js";
-import { applyChunkingToRecords } from "../utils/RAG/chunking/applyChunkingToRecords.js";
-
-dotenv.config();
+import { processCrawlRecords } from "@/utils/cheerio/processCrawlRecords";
+import { applyChunkingToRecords } from "@/utils/RAG/chunking/applyChunkingToRecords";
 
 export const accessCrawlData = async (accountId, jobId, apiToken) => {
   // Response

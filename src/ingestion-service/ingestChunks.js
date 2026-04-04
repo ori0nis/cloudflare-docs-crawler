@@ -1,6 +1,6 @@
-import { supabase } from "../config/supabaseClient.js";
-import { embedder } from "../utils/RAG/embedding/embedder.js";
-import { insertIntoSupabase } from "./insertIntoSupabase.js";
+import { embedder } from "@/utils/RAG/embedding/embedder";
+import { supabase } from "@/config/supabaseClient";
+import { insertIntoSupabase } from "./insertIntoSupabase";
 
 export const ingestChunks = async (chunkArray) => {
   let insertedChunks = 0;
