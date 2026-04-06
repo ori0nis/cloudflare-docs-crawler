@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { accessCrawlData } from "@/service/api.service";
-import { ingestChunks } from "@/ingestion-service/ingestChunks";
 
 // GET (access crawl data using the jobId)
 export async function GET(req, { params }) {
   try {
-    const { jobId } = params;
+    const { jobId } = await params;
 
     const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
     const apiToken = process.env.CLOUDFLARE_API_TOKEN;
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!jobId) {
       return NextResponse.json(
@@ -26,12 +27,39 @@ export async function GET(req, { params }) {
     if (result.success) {
       const crawlData = result.job;
       const chunks = result.chunks;
+      const batchSize = 5;
+      const resultsSummary = { successful: 0, failed: 0 };
 
-      // Ingestion runs in background so API doesn't get blocked
-      // TODO: Check for Vercel timeouts
-      ingestChunks(chunks)
-        .then((summary) => console.log("Ingestion finished: ", summary))
-        .catch((error) => console.error("Ingestion failed: ", error));
+      const edgeFunctionUrl = `${supabaseUrl}/functions/v1/ingest-documentation`;
+
+      console.log(`Processing ${chunks.length} in batches of ${batchSize}`);
+
+      // Ingestion runs in background and in batches so API doesn't get blocked
+      for (let i = 0; i < chunks.length; i += batchSize) {
+        const batch = chunks.slice(i, i + batchSize);
+
+        try {
+          const response = await fetch(edgeFunctionUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${serviceRoleKey}`,
+            },
+            body: JSON.stringify({ chunks: batch }),
+          });
+
+          if (response.ok) {
+            resultsSummary.successful++;
+            console.log(`⚡ Batch ${resultsSummary.successful} sent`);
+          } else {
+            resultsSummary.failed++;
+            const text = await response.text();
+            console.log(`❌ Batch error: ${text}`);
+          }
+        } catch (error) {
+          console.error("❌ Batching returned fatal error: ", error.message);
+        }
+      }
 
       return NextResponse.json(
         {
@@ -40,6 +68,9 @@ export async function GET(req, { params }) {
           data: {
             job: crawlData,
             chunks,
+            totalChunks: chunks.length,
+            batchesProcessed: resultsSummary.successful,
+            batchesFailed: resultsSummary.failed,
           },
         },
         { status: 200 },
