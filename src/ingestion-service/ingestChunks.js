@@ -1,3 +1,9 @@
+//!
+//!
+//! THIS CODE HAS BEEN REPLACED BY THE DENO EDGE FUNCTION AND IS NOW DEPRECATED
+//!
+//!
+
 import { embedder } from "@/utils/RAG/embedding/embedder";
 import { supabase } from "@/config/supabaseClient";
 import { insertIntoSupabase } from "./insertIntoSupabase";

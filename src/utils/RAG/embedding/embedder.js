@@ -1,3 +1,9 @@
+//!
+//!
+//! THIS CODE HAS BEEN REPLACED BY THE DENO EDGE FUNCTION AND IS NOW DEPRECATED
+//!
+//!
+
 import { pipeline } from "@xenova/transformers";
 
 /*

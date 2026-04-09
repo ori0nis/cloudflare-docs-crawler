@@ -2,8 +2,8 @@ export const chunker = (text) => {
   let chunks = [];
   let index = 0;
   let paragraphs = text.split("\n");
-  let MIN_SIZE = 200;
-  let MAX_SIZE = 500;
+  let MIN_SIZE = 1000;
+  let MAX_SIZE = 1500;
   let buffer = "";
 
   paragraphs.forEach((paragraph) => {

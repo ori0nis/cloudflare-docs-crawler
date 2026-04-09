@@ -2,6 +2,8 @@ import { createClient } from "supabase";
 
 declare const Supabase: any;
 
+//? ingest-documentation edge function
+
 Deno.serve(async (req) => {
   try {
     const { chunks } = await req.json();
