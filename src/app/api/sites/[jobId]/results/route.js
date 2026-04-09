@@ -27,7 +27,7 @@ export async function GET(req, { params }) {
     if (result.success) {
       const crawlData = result.job;
       const chunks = result.chunks;
-      const batchSize = 5;
+      const batchSize = 2;
       const resultsSummary = { successful: 0, failed: 0 };
 
       const edgeFunctionUrl = `${supabaseUrl}/functions/v1/ingest-documentation`;
