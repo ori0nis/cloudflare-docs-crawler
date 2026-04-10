@@ -39,6 +39,8 @@ export const cheerioProcessor = (html) => {
 
   // If there are more than 5 numbers of 4 digits, discard them
   blocks = blocks.filter((block) => {
+    if (blocks.length < 40) return false;
+
     const numbers = (block.match(/\d{4}/g) || []).length;
     if (numbers >= 5) return false;
 

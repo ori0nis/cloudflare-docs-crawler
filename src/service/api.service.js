@@ -25,8 +25,6 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
 
   const data = await response.json();
 
-  console.log("📦 RAW DATA FROM CLOUDFLARE:", JSON.stringify(data, null, 2));
-
   if (!data.success || data.result.status === "errored") {
     console.error("Cloudflare detail:", JSON.stringify(data.errors, null, 2));
     console.error("Result message:", data.result.errorMessage);

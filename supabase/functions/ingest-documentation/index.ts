@@ -1,4 +1,5 @@
 import { createClient } from "supabase";
+import { chunkHasher } from "../_shared/chunkHasher.ts";
 
 declare const Supabase: any;
 
@@ -15,11 +16,12 @@ Deno.serve(async (req) => {
 
     for (const chunk of chunks) {
       try {
+        const hash = await chunkHasher(chunk.content);
+
         const { data: existing, error: checkError } = await supabase
           .from("chunk")
           .select("id")
-          .eq("url", chunk.url)
-          .eq("content", chunk.content)
+          .eq("content_hash", hash)
           .maybeSingle();
 
         if (checkError) throw new Error(`Check failed: ${checkError.message}`);
@@ -39,6 +41,7 @@ Deno.serve(async (req) => {
           url: chunk.url,
           content: chunk.content,
           dataset: chunk.dataset,
+          content_hash: hash,
           embedding: Array.from(embedding),
         });
 
