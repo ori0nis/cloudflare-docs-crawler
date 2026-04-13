@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { accessCrawlData } from "@/service/api.service";
 
-// GET (access crawl data using the jobId)
+//? GET (access crawl data using the jobId)
 export async function GET(req, { params }) {
   try {
     const { jobId } = await params;
@@ -24,10 +24,20 @@ export async function GET(req, { params }) {
 
     const result = await accessCrawlData(accountId, jobId, apiToken);
 
-    if (result.success) {
+    if (result.status === "running") {
+      return NextResponse.json(
+        {
+          status: "running",
+          message: "Cloudflare is still crawling...",
+        },
+        { status: 200 },
+      );
+    }
+
+    if (result.success && result.status === "completed") {
       const crawlData = result.job;
       const chunks = result.chunks;
-      const batchSize = 2;
+      const batchSize = 4;
       const resultsSummary = { successful: 0, failed: 0 };
 
       const edgeFunctionUrl = `${supabaseUrl}/functions/v1/ingest-documentation`;
@@ -76,6 +86,12 @@ export async function GET(req, { params }) {
         { status: 200 },
       );
     } else {
+      if (!result.success) {
+        console.error("❌ ERROR DETECTED");
+        console.log("JOB ID:", jobId);
+        console.log("Service response:", JSON.stringify(result, null, 2));
+      }
+
       return NextResponse.json(
         {
           status: 400,

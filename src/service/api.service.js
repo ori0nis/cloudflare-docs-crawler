@@ -15,6 +15,10 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
 
   // Successful response check
   if (!response.ok) {
+    const errorBody = await response.text();
+    console.error("🚨 CLOUDFLARE API ERROR:", response.status);
+    console.error("Error body:", errorBody);
+
     return {
       status: "Failed",
       success: false,

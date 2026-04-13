@@ -7,12 +7,11 @@ declare const Supabase: any;
 
 Deno.serve(async (req) => {
   try {
-    const { chunks } = await req.json();
     const supabase = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
-
     const session = new Supabase.ai.Session("gte-small");
 
-    console.log(`Received ${chunks.length} to process`);
+    const { chunks } = await req.json();
+    const datasetName = chunks[0]?.dataset;
 
     for (const chunk of chunks) {
       try {
@@ -49,6 +48,10 @@ Deno.serve(async (req) => {
       } catch (error: any) {
         console.error("Error processing chunk: ", error.message);
       }
+    }
+
+    if (datasetName) {
+      await supabase.from("datasets").update({ status: "completed" }).eq("url_base", datasetName);
     }
 
     return new Response(
