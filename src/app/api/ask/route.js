@@ -1,13 +1,8 @@
 import { NextResponse } from "next/server";
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
-
 export async function POST(req) {
   try {
-    const { userQuery } = await req.json();
-
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const { userQuery, dataset } = await req.json();
 
     if (!userQuery || typeof userQuery !== "string") {
       return NextResponse.json(
@@ -21,25 +16,53 @@ export async function POST(req) {
       );
     }
 
+    if (!dataset || typeof dataset !== "string") {
+      return NextResponse.json(
+        {
+          status: 400,
+          message: "Please provide a documentation as a reference",
+          error: "No documentation name provided",
+          data: null,
+        },
+        { status: 400 },
+      );
+    }
+
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
     const edgeFunctionUrl = `${supabaseUrl}/functions/v1/embed-user-query`;
 
+    // Query gets embedded
     const queryEmbedding = await fetch(edgeFunctionUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${serviceRoleKey}`,
       },
-      body: JSON.stringify({ query: userQuery }),
+      body: JSON.stringify({ query: userQuery, dataset: dataset }),
     });
 
     if (queryEmbedding.ok) {
       console.log("⚡ Query successfully embedded in database");
     } else {
       console.log("❌ Couldn't embed user query");
+
+      return NextResponse.json(
+        {
+          status: 400,
+          message: "Couldn't embed user query",
+          error: "Error embedding user query",
+          data: null,
+        },
+        { status: 400 },
+      );
     }
 
+    // Check if embedded query returns enough context
     const completion = await queryEmbedding.json();
-    const queryEmbedded = completion.data;
+    const queryEmbedded = completion.data || [];
 
     if (!queryEmbedded || queryEmbedded.length === 0) {
       console.log("⚠️ Couldn't find relevant context. Groq call aborted");
@@ -60,6 +83,7 @@ export async function POST(req) {
 
     console.log(`🔍 Context returned: ${queryEmbedded?.length || 0} chunks found.`);
 
+    // If enough context is found, build Groq response
     const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -67,7 +91,7 @@ export async function POST(req) {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
+        model: "llama-3.1-8b-instant", // llama-3.3-70b-versatile
         messages: [
           {
             role: "system",
@@ -80,6 +104,7 @@ export async function POST(req) {
       }),
     });
 
+    // Groq answer check
     const groqAnswer = await groqResponse.json();
 
     if (!groqResponse.ok) {
@@ -105,11 +130,6 @@ export async function POST(req) {
       { status: 200 },
     );
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: error.message,
-      },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

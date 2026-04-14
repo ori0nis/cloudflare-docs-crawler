@@ -1,3 +1,4 @@
+import AskGroq from "@/components/AskGroq";
 import IngestForm from "@/components/IngestForm";
 
 export default function HomePage() {
@@ -12,7 +13,7 @@ export default function HomePage() {
 
       <section>
         <h2>Ask Groq</h2>
-        {/* Ask chatbox */}
+        <AskGroq />
       </section>
     </main>
   );

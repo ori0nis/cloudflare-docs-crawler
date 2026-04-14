@@ -6,10 +6,10 @@ declare const Supabase: any;
 
 Deno.serve(async (req) => {
   try {
-    const { query } = await req.json();
     const supabase = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
-
     const session = new Supabase.ai.Session("gte-small");
+
+    const { query, dataset } = await req.json();
 
     console.log(`User sent query ${query}`);
 
@@ -22,6 +22,7 @@ Deno.serve(async (req) => {
       query_embedding: queryVector,
       match_threshold: 0.2,
       match_count: 10,
+      filter_dataset: dataset,
     });
 
     if (error) {

@@ -6,6 +6,7 @@ export default function IngestForm() {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState("");
 
+  // Consume jobId and ingest into supabase
   const handleConsume = async (jobId) => {
     let finished = false;
 
@@ -29,6 +30,7 @@ export default function IngestForm() {
     setLoading(false);
   };
 
+  // Receive user URL and launch consumption pipeline
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -43,7 +45,7 @@ export default function IngestForm() {
       const result = await response.json();
 
       if (result.alreadyExists) {
-        setProgress("This documentation has already been processed");
+        setProgress("This documentation has already been processed. Send your question to Groq!");
         setLoading(false);
         return;
       }
