@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { accessCrawlData } from "@/service/api.service";
+import { supabase } from "@/config/supabaseClient";
 
 //? GET (access crawl data using the jobId)
 export async function GET(req, { params }) {
@@ -35,10 +36,29 @@ export async function GET(req, { params }) {
     }
 
     if (result.success && result.status === "completed") {
-      const crawlData = result.job;
       const chunks = result.chunks;
-      const batchSize = 4;
-      const resultsSummary = { successful: 0, failed: 0 };
+      const crawlData = result.job;
+      const batchSize = 10;
+      let successfulBatches = 0;
+
+      let hostname = null;
+      if (crawlData?.url) {
+        try {
+          hostname = new URL(crawlData.url).hostname;
+        } catch (error) {
+          console.error("Cloudflare returned a bad URL: ", crawlData.url);
+        }
+      }
+
+      if (!hostname) {
+        return NextResponse.json(
+          {
+            status: "error",
+            message: "Couldn't determine hostname to update Supabase",
+          },
+          { status: 500 },
+        );
+      }
 
       const edgeFunctionUrl = `${supabaseUrl}/functions/v1/ingest-documentation`;
 
@@ -58,29 +78,37 @@ export async function GET(req, { params }) {
             body: JSON.stringify({ chunks: batch }),
           });
 
-          if (response.ok) {
-            resultsSummary.successful++;
-            console.log(`⚡ Batch ${resultsSummary.successful} sent`);
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Edge Function error:", errorText);
+            throw new Error(`Edge Function failed: ${response.status}`);
           } else {
-            resultsSummary.failed++;
-            const text = await response.text();
-            console.log(`❌ Batch error: ${text}`);
+            successfulBatches++;
           }
         } catch (error) {
-          console.error("❌ Batching returned fatal error: ", error.message);
+          console.error("Error calling Edge Function:", error.message);
+          return NextResponse.json(
+            {
+              status: "error",
+              error: err.message,
+            },
+            { status: 500 },
+          );
         }
       }
 
+      await supabase.from("datasets").update({ status: "completed" }).eq("url_base", hostname);
+
       return NextResponse.json(
         {
-          status: 200,
-          message: "Crawl data provided - ingestion running in background",
+          status: "completed",
+          message: "Ingestion finished successfully",
           data: {
             job: crawlData,
             chunks,
             totalChunks: chunks.length,
-            batchesProcessed: resultsSummary.successful,
-            batchesFailed: resultsSummary.failed,
+            batchesProcessed: successfulBatches,
+            hostname: hostname,
           },
         },
         { status: 200 },
