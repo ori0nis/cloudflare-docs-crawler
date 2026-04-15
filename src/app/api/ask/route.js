@@ -101,34 +101,15 @@ export async function POST(req) {
           },
           { role: "user", content: userQuery },
         ],
+        stream: true,
       }),
     });
 
-    // Groq answer check
-    const groqAnswer = await groqResponse.json();
-
-    if (!groqResponse.ok) {
-      console.log("❌ Groq couldn't process user query: ", groqAnswer);
-      return NextResponse.json(
-        { error: "Groq failed", details: groqAnswer.error?.message || "Unknown error" },
-        { status: groqResponse.status },
-      );
-    }
-
-    if (!groqAnswer.choices || groqAnswer.choices.length === 0) {
-      console.log("❌ Groq returned an empty completion: ", groqAnswer);
-      return NextResponse.json({ error: "Answer with no completion" }, { status: 500 });
-    }
-
-    return NextResponse.json(
-      {
-        status: 200,
-        message: "Context generated from question embeddings",
-        error: null,
-        data: groqAnswer.choices[0].message.content,
+    return new Response(groqResponse.body, {
+      headers: {
+        "Content-Type": "text/event-stream",
       },
-      { status: 200 },
-    );
+    });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

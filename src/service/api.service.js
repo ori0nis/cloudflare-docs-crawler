@@ -35,10 +35,12 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
   }
 
   const status = data.result.status;
-  const records = data.result.records;
+  const records = data.result.records || [];
   const totalRecords = data.result.total;
   const finishedRecords = data.result.finished;
   const skippedRecords = data.result.skipped;
+
+  const crawlUrl = records.length > 0 ? records[0].url : null;
 
   // Success check
   if (!data.success) {
@@ -65,6 +67,7 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
         success: true,
         job: {
           id: jobId,
+          url: crawlUrl,
           totalRecords: totalRecords ?? 0,
           finishedRecords: finishedRecords ?? 0,
           skippedRecords: skippedRecords ?? 0,

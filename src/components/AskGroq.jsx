@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 
 export default function AskGroq() {
@@ -12,10 +13,27 @@ export default function AskGroq() {
       const response = await fetch("api/datasets");
       const data = await response.json();
 
-      if (data.datasets) {
-        setAvailableDatasets(data.datasets);
+      if (data.datasets && data.datasets.length > 0) {
+        const domains = [".com", ".io", ".dev", ".net", ".org"];
 
-        if (data.datasets.length > 0) setDocumentation(data.datasets[0].url_base);
+        const formattedDatasets = data.datasets.map((dataset) => {
+          let cleanName = dataset.url_base;
+
+          for (const domain of domains) {
+            if (cleanName.includes(domain)) {
+              cleanName = cleanName.replace(domain, "");
+              break;
+            }
+          }
+
+          return {
+            original: dataset.url_base,
+            display: cleanName.charAt(0).toUpperCase() + cleanName.slice(1),
+          };
+        });
+
+        setAvailableDatasets(formattedDatasets);
+        setDocumentation(formattedDatasets[0].original);
       }
     };
 
@@ -37,18 +55,44 @@ export default function AskGroq() {
         body: JSON.stringify({ userQuery, dataset: documentation }),
       });
 
-      const result = await response.json();
+      const contentType = response.headers.get("content-type");
 
-      if (result.status === 400) {
-        setProgress("Groq couldn't answer your question: ", result.message);
+      if (!response.ok || (contentType && contentType.includes("application/json"))) {
+        const result = await response.json();
+        setProgress(`Error: ${result.message} || "Something went wrong"`);
         setLoading(false);
         return;
       }
 
-      if (result.data && result.status === 200) {
-        setProgress(result.data);
-        setLoading(false);
+      // If there are no errors, begin stream
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+
+        const chunkValue = decoder.decode(value);
+        const lines = chunkValue.split("\n");
+
+        for (const line of lines) {
+          const cleanLine = line.replace(/^data: /, "").trim();
+
+          if (!cleanLine || cleanLine === "[DONE]") continue;
+
+          try {
+            const parsed = JSON.parse(cleanLine);
+            const content = parsed.choices[0].delta?.content;
+
+            if (content) setProgress((prev) => prev + content);
+          } catch (error) {
+            // Incomplete JSON fragments get ignored
+          }
+        }
       }
+
+      setLoading(false);
     } catch (error) {
       console.error(error?.message || "There was an error processing your Groq query");
     } finally {
@@ -64,8 +108,8 @@ export default function AskGroq() {
           <option>No documentation available</option>
         ) : (
           availableDatasets.map((dataset) => (
-            <option key={dataset.url_base} value={dataset.url_base}>
-              {dataset.url_base}
+            <option key={dataset.original} value={dataset.original}>
+              {dataset.display}
             </option>
           ))
         )}
@@ -86,7 +130,7 @@ export default function AskGroq() {
         {loading ? "Thinking..." : "Ask Groq"}
       </button>
 
-      {progress && <p>{progress}</p>}
+      {progress && <div className="whitespace-pre-wrap">{progress}</div>}
     </form>
   );
 }

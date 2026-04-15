@@ -1,33 +1,44 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function IngestForm() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState("");
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   // Consume jobId and ingest into supabase
   const handleConsume = async (jobId) => {
     let finished = false;
 
     while (!finished) {
+      if (!isMounted.current) break;
+
       setProgress("Cloudflare work in progress... checking status, please bear with this humble and free API...");
 
       const res = await fetch(`api/crawl/${jobId}/results`);
       const data = await res.json();
 
       if (data.status === "completed") {
-        setProgress("Data received! Saving in database...");
-        finished(true);
+        if (isMounted.current) setProgress("Data received and saved!");
+        finished = true;
       } else if (data.status === "running") {
         await new Promise((resolve) => setTimeout(resolve, 4000));
       } else {
-        setProgress(`Error: ${data.error || "Crawl failed"}`);
+        if (isMounted.current) setProgress(`Error: ${data.error || "Error processing the crawl"}`);
         finished = true;
       }
     }
 
-    setLoading(false);
+    if (isMounted.current) setLoading(false);
   };
 
   // Receive user URL and launch consumption pipeline
@@ -50,16 +61,15 @@ export default function IngestForm() {
         return;
       }
 
-      if (result.status === 200 && result.data) {
+      if (response.ok && result.data) {
         handleConsume(result.data);
       } else {
-        alert(result.message || "Couldn't process your crawl queue");
+        setProgress(`Error: ${result.message || "Failed to start"}`);
         setLoading(false);
       }
     } catch (error) {
       console.error(error?.message || "There was an error processing the crawl queue");
-    } finally {
-      setLoading(false);
+      setProgress("Fatal error processing the crawl");
     }
   };
 
