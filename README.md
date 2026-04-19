@@ -123,9 +123,9 @@ graph TD
 ```
 
 ## 📂 Folder structure
-- /src/app: ``Next.js`` app logic + API Routes.
-- /src/components: Interface components (IngestForm, AskGroq).
-- /supabase: Edge Function setup and logic.
+- ``/src/app``: ``Next.js`` app logic + API Routes.
+- ``/src/components``: Interface components (IngestForm, AskGroq).
+- ``/supabase``: Edge Function setup and logic.
 
 ## 📄 License
 This project is open source and available under the ``MIT License``.
