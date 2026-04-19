@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-roboto);
+  --font-roboto: var(--font-roboto);
+
+  --color-brand-glow: color-mix(in srgb, var(--color-blue-500) 20%, transparent)
+}
+
+body {
+  --font-family: var(--font-sans);
+
+  background-color: var(--color-slate-950);
+  background-image: 
+    radial-gradient(circle at 50% -20%, var(--color-brand-glow), transparent 40%),
+    radial-gradient(circle at 0% 100%, var(--color-slate-900), transparent 20%);
+  color: var(--color-slate-200);
+}

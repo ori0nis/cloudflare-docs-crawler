@@ -74,24 +74,36 @@ export default function IngestForm() {
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit} className="">
-        <label htmlFor="url">Paste a documentation URL to crawl: </label>
-        <input
-          type="url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://docs.example.com"
-          className=""
-          disabled={loading}
-          required
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? "Processing" : "Start crawl"}
-        </button>
-      </form>
-
-      {progress && <p>{progress}</p>}
-    </div>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full group">
+      <div className="flex flex-col gap-2">
+        <label htmlFor="url" className="text-[10px] font-bold text-slate-500 uppercase ml-1">
+          Paste a Documentation URL:
+        </label>
+        <div className="flex flex-col md:flex-row gap-2">
+          <input
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://docs.example.com"
+            className="flex-1 bg-slate-900/40 border border-slate-800 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-500/5 outline-none transition-all p-4 rounded-2xl text-slate-200 placeholder:text-slate-700"
+            disabled={loading}
+            required
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="cursor-pointer bg-white text-black hover:bg-slate-200 font-bold py-4 px-8 rounded-2xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-white/5"
+          >
+            {loading ? "Crawling..." : "Send"}
+          </button>
+        </div>
+      </div>
+      {progress && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-slate-900/30 rounded-xl border border-slate-800/50">
+          <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
+          <p className="text-xs text-slate-400 font-medium italic">{progress}</p>
+        </div>
+      )}
+    </form>
   );
 }

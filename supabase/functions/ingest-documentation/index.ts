@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
         if (checkError) throw new Error(`Check failed: ${checkError.message}`);
 
         if (existing) {
-          console.log(`Skipping chunk - already in database`);
+          console.log(`Skipping chunk. Already in database as ID: ${existing.id}`);
           continue;
         }
 
