@@ -1,4 +1,4 @@
-# Crawldflare.AI 🚀
+# 🚀 Crawldflare.AI
 ## Advanced Vector Ingestion & RAG pipeline
 
 <img width="1806" height="969" alt="Captura de pantalla 2026-04-19 210619" src="https://github.com/user-attachments/assets/eb72e950-9842-4363-8a0f-4be78367b0a6" />
