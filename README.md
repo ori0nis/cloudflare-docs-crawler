@@ -3,13 +3,13 @@
 
 <img width="1806" height="969" alt="Captura de pantalla 2026-04-19 210619" src="https://github.com/user-attachments/assets/eb72e950-9842-4363-8a0f-4be78367b0a6" />
 
-Crawldflare.AI is a tool designed to index documentation pages using Cloudflare's new /crawl endpoint, store the data in a Supabase vector database, and allow natural language queries via Groq.
+Crawldflare.AI is a tool designed to index documentation pages using Cloudflare's new ``/crawl`` endpoint, store the data in a Supabase vector database, and allow natural language queries via Groq.
 
 - Take a look at the deployment here: https://crawldflare.vercel.app/
 
 ## 🛠️ Tech Stack & Libraries
 - **Frontend:** ``Next.js 15`` (App Router), ``Tailwind CSS v4``.
-- **Backend:** Calls to Cloudflare's /crawl endpoint, formatted using ``Cheerio`` and served via ``Next.js API Routes`` + ``Supabase Edge Functions``.
+- **Backend:** Calls to Cloudflare's ``/crawl`` endpoint, formatted using ``Cheerio`` and served via ``Next.js API Routes`` + ``Supabase Edge Functions``.
 - **Database:** ``Supabase`` (PostgreSQL + pgvector).
 - **IA:** ``Groq Cloud`` (LLM) via API call.
 
@@ -40,7 +40,7 @@ create table datasets (
   created_at timestamp with time zone default now()
 );
 
--- Tabla "Chunks" (vector fragments of crawled data)
+-- Table "Chunks" (vector fragments of crawled data)
 create table chunks (
   id uuid primary key default gen_random_uuid(),
   dataset_id uuid references datasets(id),
@@ -52,11 +52,6 @@ create table chunks (
 
 ### 🥈 Step 2 - create ``match_chunks`` function. This function is vital for Crawldflare's context supply to Groq.
 ```SQL
-create extension if not exists vector;
-
-alter table public.chunk 
-alter column embedding type vector(384);
-
 create or replace function match_chunks (
   query_embedding vector(384),
   match_threshold float,
@@ -97,7 +92,7 @@ npm run dev
 
 ## 💡 How it works
 1. **Ingestion:** URL is sent. Cloudflare Browser Rendering extracts its contents.
-2. **Vectorization:** Content is fragmented via proprietary ``Cheerio`` processing and chunking functions, applied first through the service, and then through the Supabase Edge Functions
+2. **Vectorization:** Content is fragmented via proprietary ``Cheerio`` processing and chunking functions, applied first through the service, and then through the Supabase Edge Functions.
 3. **User query:** User sends query, relevant fragments are retrieved via semantic match and Groq response is generated.
 
 _To avoid timeouts, all processing calls are asyncronous and called via polling in the frontend._
@@ -124,7 +119,7 @@ graph TD
 
 ## 📂 Folder structure
 - ``/src/app``: ``Next.js`` app logic + API Routes.
-- ``/src/components``: Interface components (IngestForm, AskGroq).
+- ``/src/components``: Interface components (``IngestForm``, ``AskGroq``).
 - ``/supabase``: Edge Function setup and logic.
 
 ## 📄 License
@@ -134,4 +129,3 @@ This project is open source and available under the ``MIT License``.
 Contributions, issues, and feature requests are welcome! Contact me for more info, and stay up to date with the issues page.
 
 Happy crawling 🐌!
-
