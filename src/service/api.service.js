@@ -134,7 +134,11 @@ export const startCrawlingJob = async (accountId, apiToken, url) => {
       Authorization: `Bearer ${apiToken}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ url: url }),
+    body: JSON.stringify({
+      url: url,
+      limit: 10,
+      depth: 2,
+    }),
   });
 
   if (!response.ok) {
