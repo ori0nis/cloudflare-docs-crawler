@@ -22,7 +22,7 @@ export default function IngestForm() {
     while (!finished) {
       if (!isMounted.current) break;
 
-      setProgress("Cloudflare work in progress... checking status, please bear with this humble and free API...");
+      setProgress("Checking Cloudflare status, please bear with this humble and free API...");
 
       const res = await fetch(`api/crawl/${jobId}/results`);
       const data = await res.json();
@@ -32,6 +32,7 @@ export default function IngestForm() {
         finished = true;
       } else if (data.status === "running") {
         await new Promise((resolve) => setTimeout(resolve, 4000));
+        console.log("Polling result: ", data.status);
       } else {
         if (isMounted.current) setProgress(`Error: ${data.error || "Error processing the crawl"}`);
         finished = true;
@@ -101,7 +102,7 @@ export default function IngestForm() {
       {progress && (
         <div className="flex items-center gap-3 px-4 py-3 bg-slate-900/30 rounded-xl border border-slate-800/50">
           <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
-          <p className="text-xs text-slate-400 font-medium italic">{progress}</p>
+          <p className="text-sm text-slate-400 font-medium">{progress}</p>
         </div>
       )}
     </form>

@@ -10,6 +10,7 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
       headers: {
         Authorization: `Bearer ${apiToken}`,
       },
+      cache: "no-store",
     },
   );
 

@@ -24,6 +24,7 @@ export async function GET(req, { params }) {
     }
 
     const result = await accessCrawlData(accountId, jobId, apiToken);
+    console.log(`Cloudflare crawling for ${jobId} status: ${result.status}`);
 
     if (result.status === "running") {
       return NextResponse.json(
@@ -38,7 +39,7 @@ export async function GET(req, { params }) {
     if (result.success && result.status === "completed") {
       const chunks = result.chunks;
       const crawlData = result.job;
-      const batchSize = 10;
+      const batchSize = 4;
       let successfulBatches = 0;
 
       let hostname = null;
@@ -90,7 +91,7 @@ export async function GET(req, { params }) {
           return NextResponse.json(
             {
               status: "error",
-              error: err.message,
+              error: error.message,
             },
             { status: 500 },
           );
