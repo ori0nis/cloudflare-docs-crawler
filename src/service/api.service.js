@@ -136,7 +136,7 @@ export const startCrawlingJob = async (accountId, apiToken, url) => {
     },
     body: JSON.stringify({
       url: url,
-      limit: 10,
+      limit: 7,
       depth: 2,
     }),
   });

@@ -30,6 +30,7 @@ export default function IngestForm() {
       if (data.status === "completed") {
         if (isMounted.current) setProgress("Data received and saved!");
         finished = true;
+        window.dispatchEvent(new Event("ingestion-complete"));
       } else if (data.status === "running") {
         await new Promise((resolve) => setTimeout(resolve, 4000));
         console.log("Polling result: ", data.status);

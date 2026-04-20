@@ -8,36 +8,41 @@ export default function AskGroq() {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState("");
 
-  useEffect(() => {
-    const fetchDatasets = async () => {
-      const response = await fetch("api/datasets");
-      const data = await response.json();
+  // Fetch datasets to show as select options
+  const fetchDatasets = async () => {
+    const response = await fetch("api/datasets");
+    const data = await response.json();
 
-      if (data.datasets && data.datasets.length > 0) {
-        const domains = [".com", ".io", ".dev", ".net", ".org"];
+    if (data.datasets && data.datasets.length > 0) {
+      const domains = [".com", ".io", ".dev", ".net", ".org"];
 
-        const formattedDatasets = data.datasets.map((dataset) => {
-          let cleanName = dataset.url_base;
+      const formattedDatasets = data.datasets.map((dataset) => {
+        let cleanName = dataset.url_base;
 
-          for (const domain of domains) {
-            if (cleanName.includes(domain)) {
-              cleanName = cleanName.replace(domain, "");
-              break;
-            }
+        for (const domain of domains) {
+          if (cleanName.includes(domain)) {
+            cleanName = cleanName.replace(domain, "");
+            break;
           }
+        }
 
-          return {
-            original: dataset.url_base,
-            display: cleanName.charAt(0).toUpperCase() + cleanName.slice(1),
-          };
-        });
+        return {
+          original: dataset.url_base,
+          display: cleanName.charAt(0).toUpperCase() + cleanName.slice(1),
+        };
+      });
 
-        setAvailableDatasets(formattedDatasets);
-        setDocumentation(formattedDatasets[0].original);
-      }
-    };
+      setAvailableDatasets(formattedDatasets);
+      setDocumentation(formattedDatasets[0].original);
+    }
+  };
 
+  useEffect(() => {
     fetchDatasets();
+    const handleRefresh = () => fetchDatasets();
+    window.addEventListener("ingestion-complete", handleRefresh);
+
+    return () => window.removeEventListener("ingestion-complete", handleRefresh);
   }, []);
 
   const handleSubmit = async (e) => {
