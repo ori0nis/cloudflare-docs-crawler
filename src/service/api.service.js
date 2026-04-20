@@ -10,6 +10,7 @@ export const accessCrawlData = async (accountId, jobId, apiToken) => {
       headers: {
         Authorization: `Bearer ${apiToken}`,
       },
+      cache: "no-store",
     },
   );
 
@@ -133,7 +134,11 @@ export const startCrawlingJob = async (accountId, apiToken, url) => {
       Authorization: `Bearer ${apiToken}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ url: url }),
+    body: JSON.stringify({
+      url: url,
+      limit: 7,
+      depth: 2,
+    }),
   });
 
   if (!response.ok) {

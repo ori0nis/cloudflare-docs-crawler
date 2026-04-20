@@ -1,5 +1,5 @@
 import "./globals.css";
-import {Roboto} from "next/font/google"
+import { Roboto } from "next/font/google";
 
 const roboto = Roboto({
   weight: ["400", "500", "700"],
@@ -8,14 +8,16 @@ const roboto = Roboto({
 });
 
 export const metadata = {
-  title: "Cloudflare Documentation Crawler",
-  description: "Cloudflare documentation crawler + Supabase vector storage + Groq RAG",
+  title: "Crawldflare - Cloudflare Documentation Crawler",
+  description: "Documentation crawler and vector search engine powered by Cloudflare Workers, Next.js, Supabase & Groq",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={roboto.variable}>
-      <body suppressHydrationWarning className="antialiased">{children}</body>
+      <body suppressHydrationWarning className="antialiased">
+        {children}
+      </body>
     </html>
   );
 }
